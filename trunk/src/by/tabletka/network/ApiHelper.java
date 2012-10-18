@@ -15,11 +15,21 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import by.tabletka.entities.BasicResponse;
+import by.tabletka.entities.Region;
+
 import android.util.Log;
 
 public class ApiHelper {
 
 	private static final String NAME_HOST = "http://tabletka.by/api/tab.api.php?";
+	
+	public static BasicResponse<Region> getRegionList() {
+		HashMap<String, String> params = new HashMap<String, String>();
+		String actionUrl = NAME_HOST + "regions.reglist";
+		
+		return null;
+	}
 
 	private static String buildUrl(HashMap<String, String> params,
 			String urlMethod) {
