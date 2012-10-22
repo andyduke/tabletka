@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -15,42 +18,47 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import by.tabletka.db.DataBase;
 import by.tabletka.entities.BasicResponse;
+import by.tabletka.entities.Preparation;
 import by.tabletka.entities.Region;
 
+import android.net.Uri;
 import android.util.Log;
 
 public class ApiHelper {
 
 	private static final String NAME_HOST = "http://tabletka.by/api/tab.api.php?";
-	
-	public static BasicResponse<Region> getRegionList() {
+
+	public static BasicResponse<ArrayList<Region>> getRegionList() {
 		HashMap<String, String> params = new HashMap<String, String>();
 		String actionUrl = NAME_HOST + "regions.reglist";
-		
-		return null;
+
+		return EntityParser.getRegionList(sendRequest(buildUrl(params, actionUrl)));
 	}
 
-	private static String buildUrl(HashMap<String, String> params,
-			String urlMethod) {
-		StringBuilder sb = new StringBuilder(urlMethod);
-		sb.append("={");
+	private static String buildUrl(HashMap<String, String> params, String urlMethod) {
+		StringBuilder sb = new StringBuilder(urlMethod + "=");
+		StringBuilder path = new StringBuilder("{");
 		Iterator<String> keys = params.keySet().iterator();
 		while (keys.hasNext()) {
 			String key = keys.next();
-			sb.append('"' + key).append('"' + ':' + '"')
-					.append(params.get(key));
+			path.append('"' + key + '"' + ':' + '"').append(params.get(key) + '"');
 			if (keys.hasNext())
-				sb.append('"' + ',');
+				path.append(',');
 		}
+		path.append("}");
 		Log.v("buildurl", sb.toString());
-		return sb.toString();
+		return sb.append(URLEncoder.encode(path.toString())).toString();
 	}
 
 	// GET
 	private static JSONObject sendRequest(String url) {
 		HttpClient httpClient = new DefaultHttpClient();
-		HttpGet httpget = new HttpGet(url);
+		// URI uri = URI.create(url);
+		HttpGet httpget = new HttpGet(url);// url.replace("{",
+											// "%7B").replace("}", "%7D"));
+		// httpget.setURI(url);
 		HttpResponse httpresp = null;
 		InputStream is = null;
 		try {
@@ -93,6 +101,25 @@ public class ApiHelper {
 		}
 		Log.v("streamstring", sb.toString());
 		return sb.toString();
+	}
+
+	public static BasicResponse<ArrayList<Preparation>> searchPreparation(String name, String region) {
+		HashMap<String, String> params = new HashMap<String, String>();
+		String actionUrl = NAME_HOST + "search.drugs";
+
+		params.put("ls", name);
+		params.put("regnum", region);
+
+		return EntityParser.searchDrugs(sendRequest(buildUrl(params, actionUrl)));
+	}
+
+	public static void loadData(DataBase dataBase, long time) {
+		HashMap<String, String> params = new HashMap<String, String>();
+		if (time != 0)
+			params.put("ts", String.valueOf(time));
+		String actionUrl = NAME_HOST + "tablist.download";
+
+		EntityParser.loadAll(sendRequest(buildUrl(params, actionUrl)), dataBase);
 	}
 
 }
