@@ -16,12 +16,14 @@ import android.widget.Spinner;
 import by.tabletka.R;
 import by.tabletka.app.App;
 import by.tabletka.db.DataBase;
+import by.tabletka.entities.Region;
 import by.tabletka.network.asynktasks.LoadAllData;
 import by.tabletka.network.asynktasks.OnSuccessAsyncTask;
 
 public class MainActivity extends Activity implements OnSuccessAsyncTask {
 
 	private ArrayList<String> regionsName;
+	private boolean isSelect;
 
 	private Spinner spinner;
 	private DataBase dataBase = new DataBase(this);
@@ -41,22 +43,38 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 	private void initSpinner() {
 		dataBase.open();
 		regionsName = dataBase.getRegionsNames();
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, regionsName);
+		int defNumb = getSelection();
+		regionsName.add(0, regionsName.get(defNumb));
+		regionsName.remove(defNumb + 1);
+		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
+				regionsName);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		spinner.setPrompt("Ваш регион");
 		dataBase.close();
-		
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				
+				String selecting;
+				if (isSelect) {
+					selecting = adapter.getItem(position);
+					App.saveIntoShared(selecting, MainActivity.this);
+				} else {
+					selecting = adapter.getItem(getSelection());
+					isSelect = true;
+				}
 			}
 
 			public void onNothingSelected(AdapterView<?> parent) {
-				
+
 			}
 		});
+	}
+
+	private int getSelection() {
+		SharedPreferences prefs = getSharedPreferences(App.PREFS_NAME, 0);
+		String name = prefs.getString(Region.NAME, "Минск");
+		return regionsName.indexOf(name);
 	}
 
 	public void insertDB() {
@@ -73,7 +91,7 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 	}
 
 	public void onSuccessAsyncTask(Object resultObject) {
-//		dataBase.close();
+		// dataBase.close();
 		initSpinner();
 	}
 }

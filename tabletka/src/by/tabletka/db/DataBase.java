@@ -39,11 +39,11 @@ public class DataBase extends SQLiteOpenHelper {
 	public final static int SAT_COLUMN = 14;
 	public final static int SUN_COLUMN = 15;
 
-	public final static int REGION_ID_COLUMN = 1;
-	public final static int REGION_NAME_COLUMN = 2;
+	public final static int REGION_ID_COLUMN = 0;
+	public final static int REGION_NAME_COLUMN = 1;
 
-	private SQLiteDatabase mDatabase;
-//	private Cursor mCursor;
+	private static SQLiteDatabase mDatabase;
+	// private Cursor mCursor;
 	private Context mContext;
 
 	public DataBase(Context context) {
@@ -94,8 +94,8 @@ public class DataBase extends SQLiteOpenHelper {
 	public void close() {
 		super.close();
 		mDatabase.close();
-//		if (mCursor != null && !mCursor.isClosed())
-//			mCursor.close();
+		// if (mCursor != null && !mCursor.isClosed())
+		// mCursor.close();
 	}
 
 	public long addApothecary(ApothecaryDetails apothecary) {
@@ -166,5 +166,24 @@ public class DataBase extends SQLiteOpenHelper {
 		}
 		mCursor.close();
 		return regs;
+	}
+
+	public static Region getRegionForName(String selecting) {
+		Cursor mCursor = mDatabase.query(TABLE_REGS, null, null, null, null, null, KEY_ID);
+		Region region = new Region();
+		mCursor.moveToFirst();
+		do {
+
+			if (mCursor.getString(REGION_NAME_COLUMN).equals(selecting)) {
+				region.setId(mCursor.getString(REGION_ID_COLUMN));
+				region.setName(mCursor.getString(REGION_NAME_COLUMN));
+				mCursor.close();
+				return region;
+			}
+			mCursor.moveToNext();
+		} while (!mCursor.isLast());
+		mCursor.close();
+		return region;
+
 	}
 }
