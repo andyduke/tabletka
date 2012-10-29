@@ -7,18 +7,21 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 import by.tabletka.R;
 import by.tabletka.app.App;
 import by.tabletka.db.DataBase;
 import by.tabletka.entities.Region;
 import by.tabletka.network.asynktasks.LoadAllData;
 import by.tabletka.network.asynktasks.OnSuccessAsyncTask;
+import by.tabletka.network.asynktasks.SearchPreparation;
 
 public class MainActivity extends Activity implements OnSuccessAsyncTask {
 
@@ -27,6 +30,7 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 
 	private Spinner spinner;
 	private DataBase dataBase = new DataBase(this);
+	private OnSuccessAsyncTask onSuccessAsyncTask = this;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,8 +39,20 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 		setContentView(R.layout.activity_main);
 
 		spinner = (Spinner) findViewById(R.id.spinner);
-		EditText name = (EditText) findViewById(R.id.enter_name);
+		final EditText name = (EditText) findViewById(R.id.enter_name);
 		Button search = (Button) findViewById(R.id.search);
+		search.setOnClickListener(new OnClickListener() {
+
+			public void onClick(View v) {
+				String text = name.getText().toString();
+				if (text.length() < 3)
+					Toast.makeText(MainActivity.this, "Слишком короткий запрос. Введите не менее трех символов",
+							Toast.LENGTH_LONG).show();
+				else
+					new SearchPreparation(MainActivity.this, onSuccessAsyncTask, true).execute(text, String.valueOf(getSelection()));
+
+			}
+		});
 
 	}
 
