@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 import by.tabletka.dialogs.DialogForAsyncTask;
 import by.tabletka.entities.BasicResponse;
+import by.tabletka.network.yesClick;
 
 public abstract class BasicAsynkTask<T> extends
 		AsyncTask<String, Void, BasicResponse<T>> {
@@ -25,7 +26,7 @@ public abstract class BasicAsynkTask<T> extends
 	protected void onPreExecute() {
 		dialog = new DialogForAsyncTask(mContext);
 		if (!isInternetConnection()) {
-			dialog.showServerMessage("Internet connection not available");
+			dialog.showServerMessage("Internet connection not available", true);
 		} else if (isDialogShow) {
 			dialog.show();
 			super.onPreExecute();
@@ -56,27 +57,27 @@ public abstract class BasicAsynkTask<T> extends
 				Log.v("Response", "500 ok");
 				break;
 			case 550:
-				dialog.showServerMessage("Внимание! Поиск по торговым наименованиям не дал результатов, был произведен поиск по МНН");
+				dialog.showServerMessage("Внимание! Поиск по торговым наименованиям не дал результатов, был произведен поиск по МНН", true);
 				Log.v("Response", "550 MNN");
 				break;
 			case 501:
-				dialog.showServerMessage("Meньше 3х букв");
+				dialog.showServerMessage("Meньше 3х букв", true);
 				Log.v("Response", "501 < 3 символов");
 				break;
 			case 504:
-				dialog.showServerMessage("В справочнике не найдено соответствий (ничего не найдено).");
+				dialog.showServerMessage("В справочнике не найдено соответствий (ничего не найдено).", true);
 				Log.v("Response", "504 not found");
 				break;
 			case 505:
-				dialog.showServerMessage("Нет препарата в выбранном регионе.Искать в других?");
+				dialog.showServerMessage("Искомый препарат отсутствует в выбранном регионе, но присутствует в других регионах. Показать результаты по другим регионам?", false);
 				Log.v("Response", "505 not found in region");
 				break;
 			case 555:
-				dialog.showServerMessage("Произведен поиск по МНН (составу), поиск результативен, но в данном регионе препаратов с подобным МНН (составом) нет. Искать в других регионах?");
+				dialog.showServerMessage("Произведен поиск по МНН (составу), поиск результативен, но в данном регионе препаратов с подобным МНН (составом) нет. Искать в других регионах?", false);
 				Log.v("Response", "555 not found in region");
 				break;
 			case 100:
-				dialog.showServerMessage("Ошибка сервера. Попробуйте ещё раз");
+				dialog.showServerMessage("Ошибка сервера. Попробуйте ещё раз", true);
 				Log.v("Response", "100 other error");
 				break;
 

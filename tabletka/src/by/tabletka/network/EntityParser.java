@@ -51,12 +51,16 @@ public class EntityParser {
 
 	public static BasicResponse<ArrayList<Preparation>> searchDrugs(JSONObject object) {
 		BasicResponse<ArrayList<Preparation>> response = new BasicResponse<ArrayList<Preparation>>();
-		JSONArray result;
+
 		try {
-			result = object.getJSONArray(RESPONSE);
-			if (result != null && result.length() != 0) {
-				response.setCodeResult(result.getInt(0));
-				response.setResulData(getPreparations(result));
+			Object result = object.get(RESPONSE);
+			if (result instanceof Integer)
+				response.setCodeResult((Integer) result);
+			else {
+				if (result != null && ((JSONArray) result).length() != 0) {
+					response.setCodeResult(((JSONArray) result).getInt(0));
+					response.setResulData(getPreparations((JSONArray) result));
+				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();

@@ -49,7 +49,7 @@ public class ApiHelper {
 				path.append(',');
 		}
 		path.append("}");
-		Log.v("buildurl", sb.toString());
+		Log.v("buildurl", path.toString());
 		return sb.append(URLEncoder.encode(path.toString())).toString();
 	}
 
