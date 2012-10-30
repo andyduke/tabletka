@@ -31,6 +31,7 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 	private Spinner spinner;
 	private DataBase dataBase = new DataBase(this);
 	private OnSuccessAsyncTask onSuccessAsyncTask = this;
+	private String currentRegion;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -49,7 +50,8 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 					Toast.makeText(MainActivity.this, "Слишком короткий запрос. Введите не менее трех символов",
 							Toast.LENGTH_LONG).show();
 				else
-					new SearchPreparation(MainActivity.this, onSuccessAsyncTask, true).execute(text, String.valueOf(getSelection()));
+					new SearchPreparation(MainActivity.this, onSuccessAsyncTask, true).execute(text,
+							String.valueOf(DataBase.getRegionForName(currentRegion).getId()));
 
 			}
 		});
@@ -57,26 +59,25 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 	}
 
 	private void initSpinner() {
-		dataBase.open();
-		regionsName = dataBase.getRegionsNames();
 		int defNumb = getSelection();
-		regionsName.add(0, regionsName.get(defNumb));
+		currentRegion = regionsName.get(defNumb);
+		regionsName.add(0, currentRegion);
 		regionsName.remove(defNumb + 1);
 		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item,
 				regionsName);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner.setAdapter(adapter);
 		spinner.setPrompt("Ваш регион");
-		dataBase.close();
 		spinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-				String selecting;
+
 				if (isSelect) {
-					selecting = adapter.getItem(position);
-					App.saveIntoShared(selecting, MainActivity.this);
+					currentRegion = adapter.getItem(position);
+					App.saveIntoShared(currentRegion, MainActivity.this);
 				} else {
-					selecting = adapter.getItem(getSelection());
+					currentRegion = regionsName.get(getSelection());
+
 					isSelect = true;
 				}
 			}
@@ -88,6 +89,7 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 	}
 
 	private int getSelection() {
+		regionsName = dataBase.getRegionsNames();
 		SharedPreferences prefs = getSharedPreferences(App.PREFS_NAME, 0);
 		String name = prefs.getString(Region.NAME, "Минск");
 		return regionsName.indexOf(name);
@@ -107,7 +109,6 @@ public class MainActivity extends Activity implements OnSuccessAsyncTask {
 	}
 
 	public void onSuccessAsyncTask(Object resultObject) {
-		// dataBase.close();
 		initSpinner();
 	}
 }
