@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import by.tabletka.entities.ApothecaryDetails;
 import by.tabletka.entities.ApothecaryDetails;
@@ -39,12 +40,12 @@ public class DataBase extends SQLiteOpenHelper {
 	public final static int SAT_COLUMN = 14;
 	public final static int SUN_COLUMN = 15;
 
-	public final static int REGION_ID_COLUMN = 0;
-	public final static int REGION_NAME_COLUMN = 1;
+	public final static int REGION_ID_COLUMN = 1;
+	public final static int REGION_NAME_COLUMN = 2;
 
 	private static SQLiteDatabase mDatabase;
 	// private Cursor mCursor;
-	private Context mContext;
+	private static Context mContext;
 
 	public DataBase(Context context) {
 		super(context, DB_NAME, null, DB_VESION);
@@ -77,7 +78,7 @@ public class DataBase extends SQLiteOpenHelper {
 		onCreate(db);
 	}
 
-	public void open() {
+	public static void open() {
 		try {
 
 			if (mDatabase != null) {
@@ -86,7 +87,7 @@ public class DataBase extends SQLiteOpenHelper {
 
 			mDatabase = new DataBase(mContext).getWritableDatabase();
 		} catch (SQLException e) {
-			Log.e(this.toString(), "Error while getting database");
+			Log.e("DataBase", "Error while getting database");
 			throw new Error("The end");
 		}
 	}
@@ -157,6 +158,7 @@ public class DataBase extends SQLiteOpenHelper {
 	}
 
 	public ArrayList<String> getRegionsNames() {
+		open();
 		Cursor mCursor = mDatabase.query(TABLE_REGS, new String[] { Region.NAME }, null, null, null, null, KEY_ID);
 		ArrayList<String> regs = new ArrayList<String>();
 		mCursor.moveToFirst();
@@ -165,10 +167,12 @@ public class DataBase extends SQLiteOpenHelper {
 			regs.add(mCursor.getString(0));
 		}
 		mCursor.close();
+		mDatabase.close();
 		return regs;
 	}
 
 	public static Region getRegionForName(String selecting) {
+		open();
 		Cursor mCursor = mDatabase.query(TABLE_REGS, null, null, null, null, null, KEY_ID);
 		Region region = new Region();
 		mCursor.moveToFirst();
@@ -183,6 +187,7 @@ public class DataBase extends SQLiteOpenHelper {
 			mCursor.moveToNext();
 		} while (!mCursor.isLast());
 		mCursor.close();
+		mDatabase.close();
 		return region;
 
 	}

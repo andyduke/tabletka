@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import android.util.Log;
 import by.tabletka.dialogs.DialogForAsyncTask;
 import by.tabletka.entities.BasicResponse;
-import by.tabletka.network.yesClick;
 
 public abstract class BasicAsynkTask<T> extends
 		AsyncTask<String, Void, BasicResponse<T>> {
